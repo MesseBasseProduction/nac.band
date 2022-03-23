@@ -1,147 +1,255 @@
 import './nac.scss';
 
 
+const DEBUG = false;
+
+
 class NAC {
 
 
-	constructor(lang) {
-		console.log('Hello, fellow geek! Stay in touch with us at messe-basse-production.com if you have any project that needs a hand.');
-		this._lang = lang || 'fr';
-		this._activeTrack = 'Dystopie';
-		this._audio = new Audio(`/assets/audio/${this._activeTrack}Extract.mp3`);
-		this._handlePlayback();
-		this._handleClick();
-	}
+  constructor() {
+    this._lang = (navigator.language === 'fr') ? 'fr' : 'en';
+    this._nls = null;
+    this._version = '1.2.0';
+
+    if (DEBUG === true) { console.log(`NAC v${this._version} : Begin website initialization`); }
+
+    this._fetchLang()
+      .then(this._init.bind(this))
+      .catch(err => { // Error are displayed even if DEBUG is set to false, to notify end user to contact support
+        console.error(`BandWebsite v${this._version} : Fatal error during initialization, please contact support :\n`, err);
+      })
+      .finally(() => {
+        if (DEBUG === true) { console.log(`NAC v${this._version} : Website initialization done`); }
+      });
+  }
 
 
-	_handlePlayback() {
-		const button = document.getElementById('play-pause');
-		button.src = '/assets/img/play.svg';
-
-		const progressTrack = document.getElementById('progress-bar');
-		const progress = document.getElementById('current-progress');
-		let playing = false;
-
-		button.addEventListener('click', () => {
-			if (playing === true) {
-				playing = false;
-				button.src = '/assets/img/play.svg';
-				this._audio.pause();
-			} else {
-				playing = true;
-				button.src = '/assets/img/pause.svg';
-				this._audio.play();
-			}
-		});
-
-		this._audio.addEventListener('timeupdate', () => {
-			progress.style.width = `${(this._audio.currentTime / this._audio.duration) * 100}%`;
-		});
-
-		this._audio.addEventListener('ended', () => {
-			this._audio.currentTime = 0;
-			progress.style.width = '0';
-			button.src = '/assets/img/play.svg';
-			playing = false;
-		});
-
-		progressTrack.addEventListener('click', event => {
-			if (playing === true) {
-				const box = progressTrack.getBoundingClientRect();
-				this._audio.currentTime = ((event.clientX - box.left) / box.width) * this._audio.duration;
-				progress.style.width = `${(this._audio.currentTime / this._audio.duration) * 100}%`;
-			}
-		});
-	}
+  _fetchLang() {
+    if (DEBUG === true) { console.log(`1. Fetch language keys with ${this._lang} locale`); }
+    return new Promise((resolve, reject) => {
+      fetch(`assets/json/${this._lang}.json`).then(data => {
+        data.json().then(nlsKeys => {
+          if (DEBUG === true) { console.log(`2. Language keys successfully retrieven`); }
+          this._nls = nlsKeys;
+          resolve();
+        }).catch(err => {
+          if (DEBUG === true) { console.log(`Err. Can't parse language keys, the JSON file may be is invalid`); }
+          reject(err);
+        });
+      }).catch(err => {
+        if (DEBUG === true) { console.log(`Err. Couldn't retrieve language keys`); }
+        reject(err);
+      });
+    });
+  }
 
 
-	_handleClick() {
-		const composer = { fr: 'Compositeur', en: 'Composer' };
-		const author = { fr: 'Auteur', en: 'Author' };
-		const tracks = ['Dystopie', 'Crad', 'Tramp'];
-		const times = ['46:30', '6:48', '6:43'];
-		const tracklist = [
-			`<h3>1. Crad' Bar Boogie – 6:48</h3><p><i>${composer[this._lang]}</i> : Pierre Toïgo<br><i>${author[this._lang]}</i> : David Béché</p><h3>2. Bad Dreams – 6:08</h3><p><i>${composer[this._lang]}</i> : Pierre Toïgo<br><i>${author[this._lang]}</i> : David Béché, Philippe Dromard</p><h3>3. Dystopie – 6:12</h3><p><i>${composer[this._lang]}</i> : Philippe Dromard, Pierre Toïgo<br><i>${author[this._lang]}</i> : Arthur Beaulieu</p><h3>4. Nature Humaine – 6:03</h3><p><i>${composer[this._lang]}</i> : Lionel Baudet, Pierre Toïgo<br><i>${author[this._lang]}</i> : Arthur Beaulieu, Lionel Baudet</p><h3>5. Amor Ciego – 6:23</h3><p><i>${composer[this._lang]}</i> : Lionel Baudet, Pierre Toïgo<br><i>${author[this._lang]}</i> : David Béché</p><h3>6. Tramp – 6:43</h3><p><i>${composer[this._lang]}</i> : Arthur Beaulieu, Pierre Toïgo<br><i>${author[this._lang]}</i> : David Béché</p><h3>7. Résilience (feat. Tom) – 8:09</h3><p><i>${composer[this._lang]}</i> : Pierre Toïgo<br><i>${author[this._lang]}</i> : David Béché</p> `,
-			`<h3>1. Crad' Bar Boogie – 6:48</h3><p><i>${composer[this._lang]}</i> : Pierre Toïgo<br><i>${author[this._lang]}</i> : David Béché</p><h3>`,
-			`<h3>1. Tramp – 6:43</h3><p><i>${composer[this._lang]}</i> : Arthur Beaulieu, Pierre Toïgo<br><i>${author[this._lang]}</i> : David Béché</p>`
-		];
-		const titles = ['Dystopie', 'Crad\' Bar Boogie', 'Tramp'];
-		const spotify = ['44p4oWCfMZKX9HJt64ncoj', '4zeFpm6v6E2nuCBMSCFL8d', '4DCYfTa2gWMaBvP6qNBEti'];
-		const apple = ['dystopie/1588780184', 'crad-bar-boogie/1588777286?i=1588777287', 'tramp-single/1588181001'];
-		const amazon = ['B09HRC1LJS', 'B09HRB5D81', 'B09HJTR29N'];
-		//const pandora = ['', '', ''];
-		const tidal = ['200014684', '200014704', '199407447'];
-		const deezer = ['263543602', '263542232', '262556472'];
-		const youtube = ['v=c8WVsM9SDgc&list=PLp5D05IpZHwLKjS1HYOAMvtdc3rFaLFze', 'v=c8WVsM9SDgc', 'v=CsxhdwfJVyk'];
-		const discogs = ['20399056-NAC-Dystopie', '20398864-NAC-Crad-Bar-Boogie', '20398474-NAC-Tramp'];
-		const musicbrainz = ['39049941-c348-4aeb-b86b-a5af7093d3ea', '3921323e-d906-47fe-bc17-e5d359cc4ea3', '0c82ec60-852a-4c23-bc7b-2a4377f82702'];
-		const genius = ['Dystopie', 'Crad-bar-boogie-single', 'Tramp-single'];
-		const bandcamp = ['dystopie', 'crad-bar-boogie-single', 'tramp-single-2'];
-		const dates = {
-			fr: ['9 Novembre 2021', '31 Octobre 2021', '15 Octobre 2021'],
-			en: ['November 9, 2021', 'October 31, 2021', 'October 15, 2021']
-		};
+  _init() {
+    if (DEBUG === true) { console.log(`3. Build HTML DOM depending on the page type`); }
+    return new Promise((resolve, reject) => {
+      if (document.body.dataset.type === 'index') {
+        this._buildIndexPage();
+      } else if (document.body.dataset.type === 'listen') {
+        this._buildListenPage();
+      } else if (document.body.dataset.type === 'tree') {
+        this._buildTreePage();
+      } else {
+        if (DEBUG === true) { console.log(`Err. Unknown page type to init the website with`); }
+        reject(new Error('Invalid <body> type. Should be either index, listen or tree'));
+      }
+      resolve();
+    });
+  }
 
-		const updateUI = arrayIndex => {
-			document.getElementById('release-background').classList.remove(this._activeTrack.toLowerCase());
-			document.getElementById('release-background-bottom').classList.remove(this._activeTrack.toLowerCase());
-			this._audio.pause();
-			this._audio.currentTime = 0;
-			this._activeTrack = tracks[arrayIndex];
-			document.getElementById('release-background').classList.add(this._activeTrack.toLowerCase());
-			document.getElementById('release-background-bottom').classList.add(this._activeTrack.toLowerCase());
-			document.getElementById('release-cover').src = `/assets/img/${this._activeTrack}.webp`;
-			document.getElementById('release-duration').innerHTML = times[arrayIndex];
-			document.getElementById('release-title').innerHTML = titles[arrayIndex];
-			document.getElementById('release-date').innerHTML = dates[this._lang][arrayIndex];
-			document.getElementById('release-tracklist').innerHTML = tracklist[arrayIndex];
-			document.getElementById('spotify').href = `https://open.spotify.com/album/${spotify[arrayIndex]}`;
-			document.getElementById('apple').href = `https://music.apple.com/us/album/${apple[arrayIndex]}`;
-			document.getElementById('amazon').href = `https://music.amazon.fr/albums/${amazon[arrayIndex]}`;
-			document.getElementById('deezer').href = `https://www.deezer.com/fr/album/${deezer[arrayIndex]}`;
-			document.getElementById('youtube').href = `https://www.youtube.com/watch?${youtube[arrayIndex]}`;
-			document.getElementById('bandcamp').href = `https://nacband.bandcamp.com/album/${bandcamp[arrayIndex]}`;
-			this._audio = new Audio(`/assets/audio/${this._activeTrack}Extract.mp3`);
-			this._handlePlayback();
-		};
 
-		let index = 0;
-		document.getElementById('release-previous').addEventListener('click', e => {
-			e.target.blur();
-			index = (3 + index - 1) % 3;
-			updateUI(index);
-		});
+  _buildIndexPage() {
+    if (DEBUG === true) { console.log(`4. Init website with the artist main page`); }
+    document.querySelector('#band-name').innerHTML = this._nls.band.name;
+    document.querySelector('#band-desc').innerHTML = this._nls.band.desc;
+    document.querySelector('#listen-link').innerHTML = this._nls.listenLink;
+    document.querySelector('#tree-link').innerHTML = this._nls.treeLink;
+  }
 
-		document.getElementById('release-next').addEventListener('click', e => {
-			e.target.blur();
-			index = (index + 1) % 3;
-			updateUI(index);
-		});
-		// Modal handling
-		const overlay = document.getElementById('modal-overlay');
-		document.getElementById('modal-overlay').addEventListener('click', () => {
-			overlay.style.opacity = 0;
-			setTimeout(() => {
-				overlay.innerHTML = '';
-				overlay.style.display = 'none';
-			}, 400);
-		});
 
-		document.getElementById('see-more-links').addEventListener('click', () => {
-			fetch('/assets/html/seemoremodal.html').then(data => {
-				overlay.style.display = 'flex';
-				data.text().then(htmlString => {
-					overlay.appendChild(document.createRange().createContextualFragment(htmlString));
-					document.getElementById('tidal').href = `https://listen.tidal.com/album/${tidal[index]}`;
-					//document.getElementById('pandora').href = `https://nacband.bandcamp.com/album/${pandora[index]}`;
-					document.getElementById('discogs').href = `https://www.discogs.com/release/${discogs[index]}`;
-					document.getElementById('musicbrainz').href = `https://musicbrainz.org/release/${musicbrainz[index]}`;
-					document.getElementById('genius').href = `https://genius.com/albums/Nac-fra/${genius[index]}`;
-					requestAnimationFrame(() => overlay.style.opacity = 1);
-				});
-			}).catch(e => console.error(e) );
-		});
-	}
+  _buildListenPage() {
+    if (DEBUG === true) { console.log(`4. Init website with the artist listen page`); }
+    // Update page nls
+    document.querySelector('#release-from').innerHTML = this._nls.from;
+    document.querySelector('#listen-online').innerHTML = this._nls.listenOnline;
+    document.querySelector('#see-more-links').innerHTML = this._nls.seeMore;
+    document.querySelector('#published-on').innerHTML = this._nls.publishedOn;
+    // Internal useful variables
+    const progress = document.getElementById('current-progress');
+    const overlay = document.getElementById('modal-overlay');
+    let audio = new Audio();
+    let activeRelease = 0;
+    // Define internal functions to update UI according to selected release
+    const updateRelease = () => {
+      // Reset audio playback and playback UI
+      audio.pause();
+      audio.currentTime = 0;
+      progress.style.width = '0';
+      // Update active release
+      const release = this._nls.band.releases[activeRelease];
+      // Update blurred backgrounds
+      document.getElementById('release-background').style.backgroundImage = `url('assets/img/releases/${release.cover}')`;
+      document.getElementById('release-background-bottom').style.backgroundImage = `url('assets/img/releases/${release.cover}')`;
+      // Update release primitive information
+      document.getElementById('release-cover').src = `assets/img/releases/${release.cover}`;
+      document.getElementById('release-duration').innerHTML = release.duration;
+      document.getElementById('release-title').innerHTML = release.title;
+      document.getElementById('release-artist').innerHTML = release.artist;
+      document.getElementById('release-date').innerHTML = release.date;
+      document.getElementById('label-link').innerHTML = release.label;
+      document.getElementById('label-link').href = release.labelLink;
+      // Update view links according to the selected release
+      for (let i = 0; i < release.links.length; ++i) {
+        if (release.links[i].url === '') { // Link type has no url and should be disabled
+          document.getElementById(release.links[i].type).classList.add('disabled'); // Only disabled button
+        } else { // Update link information
+          document.getElementById(release.links[i].type).classList.remove('disabled'); // Clear previous disabled class
+          document.getElementById(release.links[i].type).href = release.links[i].url; // Update url href link
+        }
+      }
+      // Create tracks and append them to the concerned DOM
+      document.getElementById('release-tracklist').innerHTML = this._buildTrackCredits(release.tracks);
+      setTimeout(() => {
+        // Update justify content if scroll exists
+        if (document.getElementById('release-tracklist').scrollHeight > document.getElementById('release-tracklist').clientHeight) {
+          document.getElementById('release-tracklist').style.display = 'inherit';
+          new window.ScrollBar({
+            target: document.getElementById('release-tracklist')
+          });
+        } else {
+          document.getElementById('release-tracklist').style.display = 'flex';          
+        }        
+      }, 250);
+      audio = new Audio(`assets/audio/${release.audio}`);
+      handlePlayback(audio);
+    };
+    // Handle the audio playback and events
+    const handlePlayback = () => {
+      const button = document.getElementById('play-pause');
+      button.src = 'assets/img/controls/play.svg';
+      const progressTrack = document.getElementById('progress-bar');
+      const progress = document.getElementById('current-progress');
+      let playing = false;
+      // Handle click on play/pause button
+      button.addEventListener('click', () => {
+        if (playing === true) {
+          playing = false;
+          button.src = 'assets/img/controls/play.svg';
+          audio.pause();
+        } else {
+          playing = true;
+          button.src = 'assets/img/controls/pause.svg';
+          audio.play();
+        }
+      });
+      // Update progress on audio playing
+      audio.addEventListener('timeupdate', () => {
+        progress.style.width = `${(audio.currentTime / audio.duration) * 100}%`;
+      });
+      // Reset progress and audio when playback reached the end of tracks
+      audio.addEventListener('ended', () => {
+        audio.currentTime = 0;
+        progress.style.width = '0';
+        button.src = 'assets/img/controls/play.svg';
+        playing = false;
+      });
+      // User manually seek a part of audio
+      progressTrack.addEventListener('click', event => {
+        if (playing === true) {
+          const box = progressTrack.getBoundingClientRect();
+          audio.currentTime = ((event.clientX - box.left) / box.width) * audio.duration;
+          progress.style.width = `${(audio.currentTime / audio.duration) * 100}%`;
+        }
+      });
+    };
+    // Previous and next release event handling if more than one release
+    if (this._nls.band.releases.length === 1) {
+      document.getElementById('release-previous').style.display = 'none';
+      document.getElementById('release-next').style.display = 'none';
+    } else {
+      document.getElementById('release-previous').addEventListener('click', e => {
+        e.target.blur();
+        activeRelease = (this._nls.band.releases.length + activeRelease - 1) % this._nls.band.releases.length;
+        updateRelease(activeRelease);
+      });
+      document.getElementById('release-next').addEventListener('click', e => {
+        e.target.blur();
+        activeRelease = (activeRelease + 1) % this._nls.band.releases.length;
+        updateRelease(activeRelease);
+      });
+    }
+    // Blur modal event
+    document.getElementById('modal-overlay').addEventListener('click', () => {
+      overlay.style.opacity = 0;
+      setTimeout(() => {
+        overlay.innerHTML = '';
+        overlay.style.display = 'none';
+      }, 400);
+    });
+    // Open modal event
+    document.getElementById('see-more-links').addEventListener('click', () => {
+      fetch('assets/html/seemoremodal.html').then(data => {
+        overlay.style.display = 'flex';
+        data.text().then(htmlString => {
+          overlay.appendChild(document.createRange().createContextualFragment(htmlString));
+          const release = this._nls.band.releases[activeRelease];
+          for (let i = 0; i < release.moreLinks.length; ++i) {
+            if (release.moreLinks[i].url === '') { // Link type has no url and should be disabled
+              document.getElementById(release.moreLinks[i].type).classList.add('disabled'); // Only disabled button
+            } else { // Update link information
+              document.getElementById(release.moreLinks[i].type).classList.remove('disabled'); // Clear previous disabled class
+              document.getElementById(release.moreLinks[i].type).href = release.moreLinks[i].url; // Update url href link
+            }
+          }
+          requestAnimationFrame(() => overlay.style.opacity = 1);
+        });
+      }).catch(e => console.error(e) );
+    });
+    // Update UI with first release available in array
+    updateRelease(activeRelease);
+  }
+
+
+  _buildTreePage() {
+    if (DEBUG === true) { console.log(`4. Init website with the artist link tree`); }
+    // Iterate over link to create link content
+    for (let i = 0; i < this._nls.band.links.length; ++i) {
+      document.querySelector('#link-wrapper').innerHTML += `
+      <a href="${this._nls.band.links[i].url}" class="link" target="_blank" rel="noopener noreferrer">
+        <img src="assets/img/logo/${this._nls.band.links[i].type}.svg" width="25px">
+        <p>${this._nls.band.links[i].name}</p>
+      </a>
+      `;
+    }
+
+    new window.ScrollBar({
+      target: document.getElementById('link-wrapper')
+    });
+  }
+
+
+  // Utils for listen page
+
+
+  _buildTrackCredits(tracks) {
+    let dom = '';
+    for (let i = 0; i < tracks.length; ++i) {
+      dom += `<h3>${i + 1}. ${tracks[i].title} – ${tracks[i].duration}</h3><p>`;
+      if (tracks[i].composer !== '') { // Add composer if any
+        dom += `<i>${this._nls.composer}</i> : ${tracks[i].composer}<br>`;
+      }
+      if (tracks[i].author !== '') { // Add author if any
+        dom += `<i>${this._nls.author}</i> : ${tracks[i].author}`;
+      }
+      dom += `</p>`;
+    }
+    return dom;
+  }
 
 
 }

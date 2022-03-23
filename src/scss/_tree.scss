@@ -1,0 +1,48 @@
+.content {
+  background-color: rgba(255, 255, 255, .1);
+  border-radius: .5rem;
+  height: 100rem;
+  max-height: 90%;
+  max-width: 100rem;
+  padding: 6rem 0;
+  text-align: center;
+
+  img.band-logo {
+    height: 12rem;
+  }
+
+  .link-wrapper {
+    height: calc(100% - 12rem - 1.5rem); /* Image height and link bottom margin */
+    overflow-y: auto;
+  }
+
+  .link {
+    align-items: center;
+    border: solid grey 1px;
+    border-radius: .5rem;
+    color: white;
+    display: flex;
+    margin: .75rem 6rem;
+    padding: .5rem 0;
+    text-decoration: none;
+
+    transition: background-color .2s;
+
+    img {
+      height: 2.5rem;
+      margin-left: 4rem;
+      margin-right: 2rem;
+    }
+
+    p {
+      font-size: 1.3rem;
+      margin-right: 4rem;
+    }
+
+    &:active,
+    &:focus,
+    &:hover {
+      background-color: rgba(255, 255, 255, .33);
+    }
+  }
+}
