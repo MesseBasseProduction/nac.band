@@ -1,25 +1,20 @@
-'use strict';
-
 const path = require('path');
 const webpack = require('webpack');
 const loaders = require('./loaders');
 const plugins = require('./plugins');
 
 module.exports = {
-  entry: ['./src/nac.js'],
+  entry: ['./src/bw.js'],
   module: {
     rules: [
       loaders.JSLoader,
-      loaders.CSSLoader,
-      loaders.FontLoader,
-      loaders.ImgLoader
+      loaders.CSSLoader
     ]
   },
   output: {
-    filename: 'NAC.bundle.js',
+    filename: 'BW.bundle.js',
     path: path.resolve(__dirname, '../assets/dist'),
-    publicPath: './',
-    library: 'NAC', // We set a library name to bundle the export default of the class
+    library: 'BW', // We set a library name to bundle the export default of the class
     libraryTarget: 'window', // Make it globally available
     libraryExport: 'default' // Make mbp.default become mbp
   },

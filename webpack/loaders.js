@@ -10,8 +10,8 @@ const CSSLoader = {
     {
       loader: MiniCssExtractPlugin.loader,
       options: {
-        publicPath: path.resolve(__dirname, '../assets/dist/')
-      }
+        publicPath: '/assets/dist/'
+      },
     },
     {
       loader: 'css-loader',
@@ -25,8 +25,8 @@ const CSSLoader = {
         },
       },
     },
-    'sass-loader'
-  ]
+    'sass-loader',
+  ],
 };
 
 const JSLoader = {
@@ -40,34 +40,7 @@ const JSLoader = {
   }
 };
 
-const FontLoader = {
-  test: /\.(woff|ttf)$/,
-  exclude: /node_modules/,
-  use: {
-    loader: 'file-loader',
-    options: {
-      name: '[contenthash].[ext]',
-      path: path.resolve(__dirname, '../assets/dist/'),
-      publicPath: './'
-    }
-  }
-}
-
-const ImgLoader = {
-  test: /\.(png|jpg|webp)$/,
-  use: {
-    loader: 'file-loader',
-    options: {
-      name: '[contenthash].[ext]',
-      path: path.resolve(__dirname, '../assets/dist/'),
-      publicPath: './'
-    }
-  }
-}
-
 module.exports = {
   CSSLoader: CSSLoader,
-  JSLoader: JSLoader,
-  FontLoader: FontLoader,
-  ImgLoader: ImgLoader
+  JSLoader: JSLoader
 };

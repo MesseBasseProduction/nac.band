@@ -1,0 +1,19 @@
+{
+  "band": {
+    "name": "Name der Musikgruppe",
+    "desc": "Beschreibung du groupe"
+  },
+  "listenLink": "Siehe die Diskographie",
+  "treeLink": "Finden Sie uns im Internet",
+  "musicians": "Die Musiker",
+  "works": "Stücke",
+  "videos": "Videos",
+  "learnMore": "Mehr erfahren",
+  "from": "von",
+  "listenOnline": "Online anhören",
+  "seeMore": "mehr sehen",
+  "publishedOn": "Veröffentlicht am",
+  "composer": "Komponist",
+  "author": "Autor",
+  "months": ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"]
+}

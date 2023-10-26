@@ -7,7 +7,7 @@ const _ESLintPlugin = require('eslint-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
 const MiniCssExtractPlugin = new _MiniCssExtractPlugin({
-  filename: 'NAC.bundle.css',
+  filename: 'BW.bundle.css',
   chunkFilename: '[id].css'
 });
 
