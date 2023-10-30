@@ -2,41 +2,60 @@ import { Color, Solver } from './js/FilterGenerator.js';
 import './bw.scss';
 
 
-const DEBUG = true;
+const DEBUG = false;
 
 
 class BW {
 
 
   constructor() {
-    this._lang = (['fr', 'es', 'de'].indexOf(navigator.language.substring(0, 2)) !== -1) ? navigator.language.substring(0, 2) : 'en';
+    this._lang = localStorage.getItem('website-lang');
+    if (this._lang === null) {
+      this._lang = (['fr', 'es', 'de', 'en'].indexOf(navigator.language.substring(0, 2)) !== -1) ? navigator.language.substring(0, 2) : 'en';
+      localStorage.setItem('website-lang', this._lang);
+    }
     this._nls = null;
     this._band = null;
     this._mainScroll = null;
-    this._version = '1.3.0'; // Based on v1.1.0 of BandWebsite
+    this._version = '1.1.0'; /* based on BandWebsite release 1.1.0 */
 
-    if (DEBUG === true) { console.log(`nac.band v${this._version} : Begin website initialization`); }
+    if (DEBUG === true) { console.log(`BandWebsite v${this._version} : Begin website initialization`); }
 
-    this._fetchLang()
+    this._initLang()
       .then(this._fetchBandInfo.bind(this))
       .then(this._init.bind(this))
       .then(this._buildPage.bind(this))
+      .then(this._events.bind(this))
       .catch(err => { // Error are displayed even if DEBUG is set to false, to notify end user to contact support
-        console.error(`nac.band v${this._version} : Fatal error during initialization, please contact support :\n`, err);
+        console.error(`BandWebsite v${this._version} : Fatal error during initialization, please contact support :\n`, err);
       })
       .finally(() => {
-        if (DEBUG === true) { console.log(`nac.band v${this._version} : Website initialization done`); }
+        if (DEBUG === true) { console.log(`BandWebsite v${this._version} : Website initialization done`); }
       });
   }
 
 
-  _fetchLang() {
+  _initLang() {
     if (DEBUG === true) { console.log(`1. Fetch language keys with ${this._lang} locale`); }
     return new Promise((resolve, reject) => {
       fetch(`assets/json/${this._lang}.json`).then(data => {
         data.json().then(nlsKeys => {
           if (DEBUG === true) { console.log(`2. Language keys successfully retrieven`); }
           this._nls = nlsKeys;
+
+          const select = document.getElementById('lang-select');
+          for (let i = 0; i < select.children.length; ++i) {
+            select.children[i].innerHTML = this._nls.lang[select.children[i].value];
+            if (select.children[i].value === this._lang) {
+              select.children[i].setAttribute('selected', true);
+            }
+          }
+          
+          select.addEventListener('change', e => {
+            localStorage.setItem('website-lang', e.target.value);
+            window.location.reload();
+          });
+
           resolve();
         }).catch(err => {
           if (DEBUG === true) { console.log(`Err. Can't parse language keys, the JSON file may be is invalid`); }
@@ -66,7 +85,7 @@ class BW {
         if (DEBUG === true) { console.log(`Err. Couldn't retrieve language keys`); }
         reject(err);
       });
-    });    
+    });
   }
 
 
@@ -113,6 +132,7 @@ class BW {
   _buildIndexPage() {
     if (DEBUG === true) { console.log(`6. Init website with the artist main page`); }
     document.querySelector('#band-name').innerHTML = this._nls.band.name;
+    document.querySelector('#band-picture').src = `./assets/img/artists/${this._band.bandPicture}`;
     document.querySelector('#band-desc').innerHTML = this._nls.band.desc;
     document.querySelector('#listen-link').innerHTML = `<img src="./assets/img/controls/disc.svg" alt="listen">${this._nls.listenLink}`;
     document.querySelector('#tree-link').innerHTML = `<img src="./assets/img/controls/find.svg" alt="listen">${this._nls.treeLink}`;
@@ -129,10 +149,23 @@ class BW {
       label.innerHTML = `
         ${this._band.members[i].fullName}<br>
         <span>© ${this._band.members[i].pictureCredit}</span><br>
-        <span id="learn-more" class="learn-more">${this._nls.learnMore}</span>
+        <span class="learn-more">${this._nls.learnMore}</span>
       `;
       container.addEventListener('click', this._artistModal.bind(this, this._band.members[i]));
       container.appendChild(picture);
+      container.appendChild(label);
+      document.getElementById('artists').appendChild(container);
+    }
+
+    if (this._band.pastMembers.length > 0) {
+      const container = document.createElement('DIV');
+      container.classList.add('past-members');
+      const label = document.createElement('P');
+      label.innerHTML = `
+        ${this._nls.pastMembers}<br>
+        <span id="learn-more" class="learn-more">${this._nls.learnMore}</span>
+      `;
+      container.addEventListener('click', this._pastMembersModal.bind(this, this._band.pastMembers));
       container.appendChild(label);
       document.getElementById('artists').appendChild(container);
     }
@@ -152,7 +185,7 @@ class BW {
         container.addEventListener('click', this._openReleaseVideo.bind(this, container.dataset.url));
         container.appendChild(picture);
         container.appendChild(label);
-        document.getElementById('releases').appendChild(container);      
+        document.getElementById('releases').appendChild(container);
       }
     }
     // Force timeout to wait for draw, then raf to display scroll
@@ -232,7 +265,9 @@ class BW {
       audio = new Audio(`assets/audio/${release.audio}`);
       handlePlayback(audio);
       // Update pager selected item
-      document.getElementById('release-pager').children[activeRelease].classList.add('selected');
+      if (this._band.releases.length < 35) {
+        document.getElementById('release-pager').children[activeRelease].classList.add('selected');
+      }
     };
     // Handle the audio playback and events
     const handlePlayback = () => {
@@ -280,37 +315,38 @@ class BW {
     } else {
       document.getElementById('release-previous').addEventListener('click', e => {
         e.target.blur();
-        document.getElementById('release-pager').children[activeRelease].classList.remove('selected');
+        if (this._band.releases.length < 35) {
+          document.getElementById('release-pager').children[activeRelease].classList.remove('selected');
+        }
         activeRelease = (this._band.releases.length + activeRelease - 1) % this._band.releases.length;
         updateRelease();
       });
       document.getElementById('release-next').addEventListener('click', e => {
         e.target.blur();
-        document.getElementById('release-pager').children[activeRelease].classList.remove('selected');
+        if (this._band.releases.length < 35) {
+          document.getElementById('release-pager').children[activeRelease].classList.remove('selected');
+        }
         activeRelease = (activeRelease + 1) % this._band.releases.length;
         updateRelease();
       });
 
-      for (let i = 0; i < this._band.releases.length; ++i) {
-        const releasePage = document.createElement('A');
-        releasePage.innerHTML = '●';
-        releasePage.addEventListener('click', e => {
-          document.getElementById('release-pager').children[activeRelease].classList.remove('selected');
-          const parent = e.target.parentNode;
-          activeRelease = Array.prototype.indexOf.call(parent.children, e.target);
-          updateRelease();
-        });
-        document.getElementById('release-pager').appendChild(releasePage);
+      if (this._band.releases.length && this._band.releases.length < 35) {
+        for (let i = 0; i < this._band.releases.length; ++i) {
+          const releasePage = document.createElement('A');
+          releasePage.innerHTML = '●';
+          releasePage.addEventListener('click', e => {
+            document.getElementById('release-pager').children[activeRelease].classList.remove('selected');
+            const parent = e.target.parentNode;
+            activeRelease = Array.prototype.indexOf.call(parent.children, e.target);
+            updateRelease();
+          });
+          releasePage.style.margin = `0 ${(3.5 / this._band.releases.length)}rem`;
+          document.getElementById('release-pager').appendChild(releasePage);
+        }
+
+        document.getElementById('release-pager').style.fontSize = `${(20 / this._band.releases.length) % 5.5}rem`;
       }
     }
-    // Blur modal event
-    document.getElementById('modal-overlay').addEventListener('click', () => {
-      overlay.style.opacity = 0;
-      setTimeout(() => {
-        overlay.innerHTML = '';
-        overlay.style.display = 'none';
-      }, 400);
-    });
     // Open modal event
     document.getElementById('see-more-links').addEventListener('click', () => {
       fetch('assets/html/seemoremodal.html').then(data => {
@@ -326,9 +362,10 @@ class BW {
               document.getElementById(release.moreLinks[i].type).href = release.moreLinks[i].url; // Update url href link
             }
           }
+          overlay.querySelector('#close-modal-button').innerHTML = this._nls.close;
           requestAnimationFrame(() => overlay.style.opacity = 1);
         });
-      }).catch(e => console.error(e) );
+      }).catch(e => console.error(e));
     });
     // Update UI with first release available in array
     updateRelease();
@@ -363,19 +400,17 @@ class BW {
   }
 
 
+  _events() {
+    // Blur modal event
+    document.getElementById('modal-overlay').addEventListener('click', this._closeModal.bind(this));
+  }
+
+
   // Utils for main page
 
 
   _artistModal(artist) {
     const overlay = document.getElementById('modal-overlay');
-    // Blur modal event
-    document.getElementById('modal-overlay').addEventListener('click', () => {
-      overlay.style.opacity = 0;
-      setTimeout(() => {
-        overlay.innerHTML = '';
-        overlay.style.display = 'none';
-      }, 400);
-    });
     // Open modal event
     fetch(`assets/html/biomodal.html`).then(data => {
       overlay.style.display = 'flex';
@@ -383,17 +418,92 @@ class BW {
         const container = document.createRange().createContextualFragment(htmlString);
         container.querySelector('#artist-name').innerHTML = artist.fullName;
         container.querySelector('#artist-picture').src = `./assets/img/artists/${artist.picture}`;
+        for (let i = 0; i < artist.roles.length; ++i) {
+          container.querySelector('#artist-roles').innerHTML += this._nls.roles[artist.roles[i]];
+          if (i + 1 < artist.roles.length) {
+            container.querySelector('#artist-roles').innerHTML += ', ';
+          }
+        }
+        container.querySelector('#artist-roles').innerHTML += ` ${this._nls.since} ${artist.range.split('-')[0]}`;
         container.querySelector('#artist-bio').innerHTML = artist.bio[this._lang];
+        container.querySelector('#close-modal-button').innerHTML = this._nls.close;
         overlay.appendChild(container);
         requestAnimationFrame(() => overlay.style.opacity = 1);
       });
-    }).catch(e => console.error(e) );
+    }).catch(e => console.error(e));
+  }
+
+
+  _pastMembersModal(pastMembers) {
+    const overlay = document.getElementById('modal-overlay');
+    // Open modal event
+    fetch(`assets/html/pastmembersmodal.html`).then(data => {
+      overlay.style.display = 'flex';
+      data.text().then(htmlString => {
+        const container = document.createRange().createContextualFragment(htmlString);
+        container.querySelector('#modal-title').innerHTML = this._nls.pastMembers;
+        const artistsContainer = container.querySelector('#past-members-container');
+        for (let i = 0; i < pastMembers.length; ++i) {
+          const member = document.createElement('DIV');
+          member.classList.add('past-member');
+          let roles = '';
+          for (let j = 0; j < pastMembers[i].roles.length; ++j) {
+            roles += this._nls.roles[pastMembers[i].roles[j]];
+            if (j + 1 < pastMembers[i].roles.length) {
+              roles += ', ';
+            }
+          }
+          roles += ` ${this._nls.from} ${pastMembers[i].range.split('-')[0]} ${this._nls.to} ${pastMembers[i].range.split('-')[1]}`;
+          member.innerHTML = `
+          <div><img src="./assets/img/artists/${pastMembers[i].picture}"><i>© ${pastMembers[i].pictureCredit}</i></div>
+          <div class="past-member-infos">
+            <span><h3>${pastMembers[i].fullName}</h3> – <i>${roles}</i></span>
+            <p>${pastMembers[i].bio[this._lang]}</p>
+          </div>
+          `;
+          artistsContainer.appendChild(member);
+        }
+        container.querySelector('#close-modal-button').innerHTML = this._nls.close;
+        overlay.appendChild(container);
+        // Force timeout to wait for draw, then raf to display scroll
+        setTimeout(() => {
+          const scroll = new window.ScrollBar({
+            target: overlay.querySelector('#past-members-container'),
+            style: {
+              color: this._band.styles.mainColor
+            }
+          });
+          // Force raf after scroll creation to make scrollbar properly visible
+          requestAnimationFrame(() => {
+            scroll.updateScrollbar();
+          });
+        }, 100);
+        // Open modal
+        requestAnimationFrame(() => overlay.style.opacity = 1);
+      });
+    }).catch(e => console.error(e));
+  }
+
+
+  _closeModal(e) {
+    if (e.originalTarget.id !== 'modal-overlay' && e.originalTarget.className !== 'close-modal') {
+      return;
+    }
+
+    const overlay = document.getElementById('modal-overlay');
+    if (overlay.style.display === 'flex') {
+      overlay.style.opacity = 0;
+      setTimeout(() => {
+        overlay.innerHTML = '';
+        overlay.style = '';
+      }, 400);
+    }
   }
 
 
   _getReleaseLink(links) {
     let url = '';
-    for (let i = 0; i < links.length; ++i) { 
+    for (let i = 0; i < links.length; ++i) {
       if (links[i].url !== '') {
         url = links[i].url;
 

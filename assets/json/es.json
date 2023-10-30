@@ -1,19 +1,38 @@
 {
   "band": {
-    "name": "Nombre de la banda",
-    "desc": "Descripción de la banda"
+    "name": "NAC",
+    "desc": "NAC es una banda de Hard Rock/Rock Progresivo, fundada en 1994 en Igny, Francia. La formación del grupo ha evolucionado muchas veces, alrededor de Pierrot y Elliot para consolidarse paulatinamente a partir de 2015. Sus eclécticos integrantes ponen su interpretación al servicio de su música; crudo y sencillo."
+  },
+  "roles": {
+    "leadvocals": "Voces Principales",
+    "backvocals": "Coro",
+    "guitar": "GitarreGuitarra",
+    "keyboard": "Teclado",
+    "bass": "Bajo",
+    "doublebass": "Contrabajo",
+    "drums": "Batería"
   },
   "listenLink": "Ver la discografia",
   "treeLink": "Encuéntrenos en línea",
   "musicians": "Los Músicos",
   "works": "Las Obras",
   "videos": "Vídeos",
-  "learnMore": "Más información",
-  "from": "de",
+  "pastMembers": "Miembros anteriores",
   "listenOnline": "Escuche en línea",
   "seeMore": "ver más",
   "publishedOn": "Publicado en",
-  "composer": "Compositor",
   "author": "Autor",
-  "months": ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
+  "composer": "Compositor",
+  "learnMore": "Más información",
+  "from": "de",
+  "to": "a",
+  "since": "desde",
+  "close": "Cerca",
+  "months": ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"],
+  "lang": {
+    "en": "🇬🇧 Inglés",
+    "fr": "🇫🇷 Francés",
+    "es": "🇪🇸 Español",
+    "de": "🇩🇪 Alemán"
+  }
 }

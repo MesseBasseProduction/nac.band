@@ -30,13 +30,25 @@ main.bio {
     }
 
     h1 {
-      font-size: 3.2rem;
+      font-size: 5.2rem;
       margin-bottom: var(--mg);
     }
 
     h2 {
       font-size: 2.4rem;
       margin-bottom: var(--mg);
+    }
+
+    .band-picture {
+      height: 50rem;
+      margin-bottom: var(--mg);
+      transition: transform .2s;
+
+      &:active,
+      &:focus,
+      &:hover {
+        transform: rotate(.6deg);
+      }
     }
 
     .links {
@@ -93,6 +105,27 @@ main.bio {
       &:hover {
         box-shadow: 0 0 .5rem rgba(255, 255, 255, .3);
         transform: scale(1.02);
+      }
+
+      &.past-members {
+        align-items: center;
+        display: flex;
+        height: 100%;
+        justify-content: center;
+        width: 100%;
+
+        p {
+          background: none;
+          opacity: 1;
+          position: inherit;
+          user-select: none;
+        }
+
+        &:active,
+        &:focus,
+        &:hover {
+          box-shadow: none;
+        }
       }
     }
 
@@ -177,10 +210,10 @@ main.bio {
   }
 }
 
-.modal-artist {
+.modal-artist,
+.past-members-modal {
   font-size: 1.3rem;
   max-height: 95%;
-  max-width: 720px;
   overflow-y: auto;
   text-align: center;
 
@@ -188,6 +221,14 @@ main.bio {
     font-size: 3.2rem;
     margin-bottom: 1.3rem;
   }
+
+  h3 {
+    margin-bottom: 1.3rem;
+  }
+}
+
+.modal-artist {
+  max-width: 720px;
 
   img {
     margin-bottom: 1.3rem;    
@@ -197,6 +238,59 @@ main.bio {
   p {
     text-indent: 1.3rem;
     margin-bottom: 1.3rem;
-    text-align: left;
+    text-align: justify;
+  }
+}
+
+.past-members-modal {
+  height: 100%;
+  max-width: 840px;
+  padding: 3rem 0 !important; /* Override parent settings */
+
+  .past-members-container {
+    height: 100%;
+    max-height: calc(100% - 11rem);
+
+    .scrollbar-content {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .past-member {
+      display: grid;
+      grid-template-columns: 25rem 1fr;
+      margin: 0 3rem;
+      margin-bottom: 1.3rem;
+  
+      img {
+        margin-bottom: .6rem;
+        padding: 1rem;
+        width: 100%;
+      }
+  
+      .past-member-infos {
+        margin-left: 1.3rem;
+        text-align: left;
+  
+        span {
+          margin-bottom: .6rem;
+          margin-left: 1.3rem;
+        }
+  
+        h3, i {
+          display: inline-block;
+        }
+  
+        p {
+          text-align: justify;
+          text-indent: 1rem;
+        }
+      }
+    }
+  }
+
+  button {
+    margin-top: 1.3rem;
   }
 }
