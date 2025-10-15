@@ -1,0 +1,10 @@
+services:
+  nac:
+    container_name: nac_node
+    build: .
+    command: npm run start
+    restart: always
+    ports:
+      - 8045:8045
+    environment:
+      - NODE_ENV=prod

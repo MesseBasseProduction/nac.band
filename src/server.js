@@ -6,7 +6,7 @@ const zlib = require('node:zlib');
 // App and preferences
 const APP_VERSION = '1.2.1';
 const APP_NAME = 'BandWebsite';
-const APP_PORT = 1337;
+const APP_PORT = 8045;
 
 // Log server start
 console.log(`${(new Date()).toISOString()} | ${APP_NAME} v${APP_VERSION} | Starting web server`);
