@@ -1,8 +1,4 @@
 {
-  "band": {
-    "name": "NAC",
-    "desc": "NAC est un groupe de Hard Rock/Rock Progressif, fondé en 1994 à Igny, France. La formation du groupe a souvent évolué, autour de Pierrot et Elliot pour progressivement se consolider à partir de 2015. Ses éclectiques membres mettent leur interprétation au service de leur musique ; brut et sans détour."
-  },
   "roles": {
     "leadvocals": "Chant Principal",
     "backvocals": "Chœurs",
@@ -12,11 +8,14 @@
     "doublebass": "Contrebasse",
     "drums": "Batterie"
   },
+  "eventsLink": "Nous voir en concert",
   "listenLink": "Voir la discographie",
   "treeLink": "Retrouvez-nous en ligne",
-  "musicians": "Les Musiciens",
+  "events": "Évènements à venir",
+  "pastEvents": "Évènements passés",
   "works": "Les Œuvres",
-  "videos": "Vidéos",
+  "musicians": "Les Musiciens",
+  "medias": "Médias",
   "learnMore": "Cliquez pour en savoir plus",
   "pastMembers": "Anciens membres",
   "listenOnline": "Écouter en ligne",
@@ -28,11 +27,11 @@
   "to": "à",
   "since": "depuis",
   "close": "Fermer",
-  "months": ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Decembre"],
   "lang": {
     "en": "🇬🇧 Anglais",
     "fr": "🇫🇷 Français",
     "es": "🇪🇸 Espagnol",
-    "de": "🇩🇪 Allemand"
+    "de": "🇩🇪 Allemand",
+    "it": "🇮🇹 Italien"
   }
 }
